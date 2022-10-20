@@ -2,8 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\Student;
+use App\Form\StudentType;
 use App\Repository\StudentRepository;
+use Doctrine\Persistence\ManagerRegistry;
+
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -38,6 +43,23 @@ class StudentController extends AbstractController
         $students=$repository->findAll();
         return $this->render('student/lists.html.twig',array('student'=>$students));
     }
+
+    #[Route('/addStudentForm', name: 'addStudentForm')]
+    public function addClassroomForm(Request  $request,ManagerRegistry $doctrine,StudentRepository $repository)
+    {
+        $student= new  Student();
+        $form= $this->createForm(StudentType::class,$student);
+        $form->handleRequest($request) ;
+        if($form->isSubmitted()){
+            $em= $doctrine->getManager();
+            $em->persist($student);
+            $em->flush();
+            return  $this->redirectToRoute("addStudentForm");
+        }
+        return $this->renderForm("student/add.html.twig",array("Formstudent"=>$form));
+    }
+
+
 
 
 }
